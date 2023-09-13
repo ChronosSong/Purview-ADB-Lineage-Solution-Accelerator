@@ -25,7 +25,7 @@ namespace UnitTests.Function.Domain.Helpers
         {
             var mockLoggerFactory = new NullLoggerFactory();
                 _config = JsonConvert.DeserializeObject<ParserSettings>(File.ReadAllText("../../../../../../../deployment/infra/OlToPurviewMappings.json")) ?? new ParserSettings();
-                _config.AdbWorkspaceUrl = "adb-unit-test.1.azuredatabricks.net";
+                _config.AdbWorkspaceUrl = "adb-unit-test.1.databricks.azure.cn";
                 _qnparser = new QnParser(_config, mockLoggerFactory, _mounts_info);
         }
 
@@ -35,11 +35,11 @@ namespace UnitTests.Function.Domain.Helpers
         // Hive not default
         [InlineData("dbfs", 
                     "/user/hive/warehouse/notdefault.db/hiveexamplea", 
-                    "notdefault.hiveexamplea@adb-unit-test.1.azuredatabricks.net")] 
+                    "notdefault.hiveexamplea@adb-unit-test.1.databricks.azure.cn")] 
         // Hive default
         [InlineData("dbfs", 
                     "/user/hive/warehouse/hiveexampleoutput000", 
-                    "default.hiveexampleoutput000@adb-unit-test.1.azuredatabricks.net")] 
+                    "default.hiveexampleoutput000@adb-unit-test.1.databricks.azure.cn")] 
         // WASBS Blob - only supported in Azure Storage, not ADLS Gen2
         [InlineData("wasbs://rawdata@purviewexamplessa.blob.core.windows.net", 
                     "/retail", 
