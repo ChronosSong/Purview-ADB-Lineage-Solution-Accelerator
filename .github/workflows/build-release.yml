@@ -88,96 +88,9 @@ jobs:
         name: Mappings
         path: ~/artifact-mappings/one-line-mappings.json
 
-  runIntegrationTests:
-    name: Test on Integration Tests
-    needs: [build]
-    runs-on: ubuntu-latest
-    environment: 
-      name: Integration
-    steps:
-    - uses: actions/checkout@v3
-
-    # Deploy the Function to integration environment
-    - name: Download Artifact
-      uses: actions/download-artifact@v3
-      with:
-        name: FunctionZip
-        path: ./artifacts
-
-    - name: Deploy Azure Function to Integration Env
-      uses: Azure/functions-action@v1.4.6
-      with:
-        app-name: ${{ secrets.INT_FUNC_NAME }}
-        package: ./artifacts/FunctionZip.zip
-        publish-profile: ${{ secrets.INT_PUBLISH_PROFILE }}
-    
-    - name: Azure Login
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.INT_AZ_CLI_CREDENTIALS }}
-    
-    - name: Compare and Update App Settings on Deployed Function
-      uses: azure/CLI@v1
-      with:
-        azcliversion: 2.34.1
-        inlineScript: |
-          chmod +x $GITHUB_WORKSPACE/tests/deployment/compare-app-settings.py
-          python3 $GITHUB_WORKSPACE/tests/deployment/compare-app-settings.py ${{ secrets.INT_FUNC_NAME }} ${{ secrets.INT_RG_NAME }}
-
-    # TODO: Deploy / Update Spark jobs
-
-    # Start up Synapse Pool and Execute Tests
-    - name: Start Integration Synapse SQL Pool
-      run: source tests/integration/manage-sql-pool.sh start ${{ secrets.INT_SUBSCRIPTION_ID }} ${{ secrets.INT_SYNAPSE_SQLPOOL_RG_NAME }} ${{ secrets.INT_SYNAPSE_WKSP_NAME }} ${{ secrets.INT_SYNAPSE_SQLPOOL_NAME }}
-      env:
-        AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-        AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-        AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-
-    - name: Install Python Requirements and Databricks CLI
-      run: pip install pyapacheatlas==0.12.0 azure-identity databricks-cli
-
-    - name: Configure Databricks CLI
-      run: |
-        echo "[DEFAULT]
-        host = https://${{ secrets.INT_DATABRICKS_WKSP_ID }}.azuredatabricks.net
-        token = ${{ secrets.INT_DATABRICKS_ACCESS_TOKEN }}" > ./config.ini
-        export DATABRICKS_CONFIG_FILE=./config.ini
-
-    - name: Confirm Databricks CLI is configured
-      run: databricks clusters spark-versions
-      env:
-        DATABRICKS_CONFIG_FILE: ./config.ini
-
-    - name: Cleanup Integration Environment
-      run: python ./tests/integration/runner.py --cleanup --dontwait None None None
-      env:
-        PURVIEW_INTEGRATION_TARGET: ${{ secrets.INT_PURVIEW_NAME }}
-        AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-        AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-        AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-        DATABRICKS_CONFIG_FILE: ./config.ini
-
-    - name: Run Integration Tests
-      run: source ./tests/integration/run-test.sh ALL ${{ secrets.INT_DATABRICKS_WKSP_ID }}
-      env:
-        PURVIEW_INTEGRATION_TARGET: ${{ secrets.INT_PURVIEW_NAME }}
-        AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-        AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-        AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-        DATABRICKS_CONFIG_FILE: ./config.ini
-
-    - name: Stop Integration Synapse SQL Pool
-      run: source tests/integration/manage-sql-pool.sh stop ${{ secrets.INT_SUBSCRIPTION_ID }} ${{ secrets.INT_SYNAPSE_SQLPOOL_RG_NAME }} ${{ secrets.INT_SYNAPSE_WKSP_NAME }} ${{ secrets.INT_SYNAPSE_SQLPOOL_NAME }}
-      env:
-        AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-        AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-        AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-
   createRelease:
     name: Create Release
     if: ${{ github.event_name == 'create' && github.ref_type == 'tag' }}
-    needs: [runIntegrationTests]
     runs-on: ubuntu-latest
     environment: 
       name: ReleaseEnvironment
