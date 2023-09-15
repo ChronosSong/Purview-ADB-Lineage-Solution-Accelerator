@@ -23,7 +23,7 @@ namespace Function.Domain.Helpers
     public class PurviewCustomType
     {
         private readonly ILogger _logger;
-        private readonly string EntityType = "purview_custom_connector_generic_entity_with_columns";
+        private readonly string EntityType = "hive_table";
         private PurviewClient _client;
         private JObject? properties;
         private AppConfigurationSettings? config = new AppConfigurationSettings();
@@ -589,7 +589,7 @@ namespace Function.Domain.Helpers
                     foreach (var entity in entityObjectModel.entities)
                     {
                         foundEntity = entity;
-                        if (entity.entityType == "purview_custom_connector_generic_entity_with_columns")
+                        if (entity.entityType == "hive_table")
                             break;
                         _logger.LogTrace($"Found entity typeName:{entity.entityType}");
                     }
