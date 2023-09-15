@@ -164,6 +164,7 @@ namespace Function.Domain.Services
                         if (newEntity.is_dummy_asset)
                         {
                             newEntity.Properties["attributes"]!["qualifiedName"] = newEntity.Properties["attributes"]!["qualifiedName"]!.ToString().ToLower();
+							newEntity.Properties["relationshipAttributes"] = JsonConvert.DeserializeObject<JToken>("{\"dbname\":\"hello world\"}");
                             tempEntities.Add(newEntity.Properties);
                         }
                     }
