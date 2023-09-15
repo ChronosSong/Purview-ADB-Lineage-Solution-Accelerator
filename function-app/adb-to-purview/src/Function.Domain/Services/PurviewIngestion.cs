@@ -208,7 +208,7 @@ namespace Function.Domain.Services
                     }
                     foreach (var deletableEntity in this.entitiesMarkedForDeletion)
                     {
-                        await _purviewClient.Delete_Unused_Entity(deletableEntity.Key, "purview_custom_connector_generic_entity_with_columns");
+                        await _purviewClient.Delete_Unused_Entity(deletableEntity.Key, "hive_table");
                     }
                     return true;
                 }
@@ -225,7 +225,7 @@ namespace Function.Domain.Services
                     }
                     foreach (var deletableEntity in this.entitiesMarkedForDeletion)
                     {
-                        await _purviewClient.Delete_Unused_Entity(deletableEntity.Key, "purview_custom_connector_generic_entity_with_columns");
+                        await _purviewClient.Delete_Unused_Entity(deletableEntity.Key, "hive_table");
                     }
                     return false;
                 }
@@ -386,7 +386,7 @@ namespace Function.Domain.Services
                     qualifiedName = Process["relationshipAttributes"]![rel!.Name]!["qualifiedName"]!.ToString();
                     string[] tmpName = qualifiedName.Split('/');
                     Name = tmpName[tmpName.Length - 1];
-                    typename = "purview_custom_connector_generic_entity_with_columns";
+                    typename = "hive_table";
                     if (!entitiesMarkedForDeletion.ContainsKey(qualifiedName))
                     {
 
