@@ -164,7 +164,7 @@ namespace Function.Domain.Services
                         if (newEntity.is_dummy_asset)
                         {
                             newEntity.Properties["attributes"]!["qualifiedName"] = newEntity.Properties["attributes"]!["qualifiedName"]!.ToString().ToLower();
-							newEntity.Properties["relationshipAttributes"] = JsonConvert.DeserializeObject<JToken>("{\"hive_db\":[{\"qualifiedName\":\"wujian@adb-198286304638699818azuredatabricksnet\"]}}");
+							newEntity.Properties["relationshipAttributes"] = JObject.Parse("{\"hive_db\":[{\"qualifiedName\":\"wujian@adb-198286304638699818azuredatabricksnet\"}]}");
                             tempEntities.Add(newEntity.Properties);
                         }
                     }
